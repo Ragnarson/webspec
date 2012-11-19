@@ -5,9 +5,9 @@ class Webspec::Formatter < RSpec::Core::Formatters::BaseFormatter
 
   def initialize(output)
     super
-    @output_hash = {:elements => []}
-    @example_group_stack = []
-    @parent_example_group = nil
+    @run = Webspec.create_run
+    @output_hash = {}
+    @example_group = @run
   end
 
   def message(message)
@@ -15,25 +15,13 @@ class Webspec::Formatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_group_started(example_group)
-    @example_group_stack.push(@parent_example_group) if @parent_example_group
-    @parent_example_group = @example_group
-    @example_group = {
-      :type => "example_group",
-      :description => example_group.description,
-      :elements => []
-    }
+    @example_group = @example_group.create_example_group({
+      :description => example_group.description
+    })
   end
 
   def example_group_finished(example_group)
-    return unless @example_group
-    if @parent_example_group
-      @parent_example_group[:elements] << @example_group
-    else
-      @output_hash[:elements] << @example_group
-    end
-
-    @example_group = @parent_example_group
-    @parent_example_group = @example_group_stack.pop
+    @example_group = @example_group.parent
   end
 
   def example_passed(example)
@@ -49,7 +37,8 @@ class Webspec::Formatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_finished(example)
-    @example_group[:elements] << example_metadata(example)
+    puts "example_finished: example_group: #{@example_group}"
+    @example_group.create_example(example_metadata(example))
   end
 
   def dump_summary(duration, example_count, failure_count, pending_count)
@@ -75,7 +64,6 @@ class Webspec::Formatter < RSpec::Core::Formatters::BaseFormatter
 
   def example_metadata(example)
     {
-      :type => "example",
       :description => example.description,
       :full_description => example.full_description,
       :status => example.execution_result[:status],
@@ -107,6 +95,6 @@ class Webspec::Formatter < RSpec::Core::Formatters::BaseFormatter
       :ruby_patchlevel => RUBY_PATCHLEVEL
     }
 
-    Webspec.report(@output_hash)
+    @run.update(@output_hash)
   end
 end

@@ -3,10 +3,6 @@ require 'spec_helper'
 describe Webspec::Formatter do
   let(:formatter) { Webspec::Formatter.new(nil) }
 
-  it "should initialize empty output hash" do
-    formatter.output_hash.should == {:elements => []}
-  end
-
   it "should add message to output_hash" do
     formatter.message("test message")
     formatter.output_hash[:messages].should == ["test message"]
@@ -25,11 +21,4 @@ describe Webspec::Formatter do
   end
 
   it "should add examples to output hash"
-
-  describe "on close" do
-    it "should report the run to Webspec" do
-      Webspec.should_receive(:report).with(formatter.output_hash)
-      formatter.close
-    end
-  end
 end

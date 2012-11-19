@@ -10,13 +10,14 @@ describe Webspec do
     end
   end
 
-  describe "report" do
-    it "should send output_hash to webspec web app" do
+  describe ".create_run" do
+    it "should create new run in webspec web app" do
       Webspec.stub(:api_key => "abc123")
       Webspec.should_receive(:post).
         with("https://webspec.shellyapp.com/projects/abc123/runs.json",
-          {:body => {:run => {:a => :b}}}).and_return(true)
-      Webspec.report({:a => :b})
+          {:body => {:run => {:a => :b}}}).and_return({"_id" => "123"})
+      Webspec::Run.should_receive(:new).with({"_id" => "123"})
+      Webspec.create_run({:a => :b})
     end
   end
 end
