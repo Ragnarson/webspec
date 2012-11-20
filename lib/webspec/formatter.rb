@@ -37,7 +37,6 @@ class Webspec::Formatter < RSpec::Core::Formatters::BaseFormatter
   end
 
   def example_finished(example)
-    puts "example_finished: example_group: #{@example_group}"
     @example_group.create_example(example_metadata(example))
   end
 
