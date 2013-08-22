@@ -10,7 +10,7 @@ module Webspec
   include HTTParty
 
   class << self
-    attr_accessor :api_key
+    attr_accessor :api_key, :run_options
 
     def base_url
       ENV['WEBSPEC_URL'] || "https://webspec.shellyapp.com"
@@ -23,7 +23,7 @@ module Webspec
     def create_run(run_params = {})
       allow_net_connect do
         url = "#{base_url}/projects/#{api_key}/runs.json"
-        response = post(url, :body => {:run => run_params})
+        response = post(url, :body => {:run => run_params.merge(run_options || {})})
         Webspec::Run.new(response.to_hash)
       end
     end
